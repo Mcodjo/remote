@@ -12,7 +12,8 @@ Aucune installation hormis Python 3.8+.
 - `?demo` sur `/share` (http://localhost:8080/share?demo) teste sans partager l'écran.
 - Aide intégrée : `/help` (diagnostic automatique, dépannage, pare-feu, FAQ).
 - Netteté : mode « Netteté maximale » (VP9, résolution native jusqu’à 4K, 30 Mb/s) ou « Vidéo et jeux » ; la qualité réellement envoyée est affichée en direct.
-- Options : `--port`, `--pin 1234`, `--no-pin`, `--no-browser`.
+- **Contrôle à distance** (souris, clavier, molette) : désactivé par défaut. L'hôte l'active, puis accepte chaque demande ; il peut reprendre la main à tout moment. Windows (SendInput) et Linux/X11 (XTest), sans dépendance ; `--no-control` le désactive.
+- Options : `--port`, `--pin 1234`, `--no-pin`, `--no-browser`, `--no-control`.
 
 ## Version MJPEG simple — `lanshare.py`
 `pip install mss pillow` puis `python lanshare.py share` (sans son, plus lourde en réseau).

@@ -7,7 +7,8 @@ NAMES = """monitor-up monitor tv smartphone tablet laptop lock shield-check copy
 volume-x maximize minimize arrow-left circle-help life-buoy stethoscope rocket wrench square presentation clapperboard
 mouse-pointer-2 plug key-round activity circle-check triangle-alert circle-x loader-circle plus chevron-down
 brick-wall network cast cloud-off wifi-off sliders-horizontal gauge graduation-cap user-round play terminal qr-code
-refresh-cw type video eye hourglass info arrow-right file-text clipboard-check monitor-play link""".split()
+refresh-cw type video eye hourglass info arrow-right file-text clipboard-check monitor-play link
+keyboard mouse-pointer-click x bell hand""".split()
 src = pathlib.Path(sys.argv[1])
 out = ['<svg xmlns="http://www.w3.org/2000/svg"><!-- Lucide (ISC) https://lucide.dev -->']
 for n in NAMES:

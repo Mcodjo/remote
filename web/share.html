@@ -33,6 +33,9 @@ fieldset{border:0;padding:0;margin:0}legend{font-weight:600;font-size:14px;color
 .qr{background:#fff;border-radius:14px;padding:14px;width:min(100%,230px);margin:0 auto;border:1px solid var(--line)}.qr svg{display:block;width:100%;height:auto}
 .side{text-align:center}.side video{width:100%;border-radius:12px;background:#000;margin-top:16px;max-height:170px;object-fit:contain}.side .cap{font-size:13.5px;color:var(--mut);margin-top:10px}
 .q{margin-top:16px;background:var(--sunken);border:1px solid var(--line);border-radius:12px;padding:10px 14px;display:grid;gap:2px}.q .k{font-size:13px;font-weight:600;color:var(--mut)}.q b{font-size:15px}.q small{color:var(--mut);font-size:13.5px}
+.ctlbox{margin-top:16px;border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:8px}.ctlbox .k{display:flex;align-items:center;gap:7px;color:var(--mut);font-size:13px;font-weight:600}
+.ctlbox p{margin:0;font-size:14.5px;color:var(--mut)}.ctlbox.active{border-color:var(--warn);background:var(--warn-soft)}.ctlbox.active p{color:var(--fg);font-weight:600}
+.sw input:disabled~.tog{opacity:.45}.sw:has(input:disabled){cursor:not-allowed}
 .empty{display:flex;gap:10px;align-items:flex-start;background:var(--sunken);border-radius:12px;padding:12px 14px;margin-top:16px;font-size:14.5px;color:var(--mut)}
 .feat{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .card.big{grid-column:1/-1;display:grid;grid-template-columns:1fr 1.1fr;gap:28px;align-items:center}
@@ -68,6 +71,8 @@ fieldset{border:0;padding:0;margin:0}legend{font-weight:600;font-size:14px;color
   </div></fieldset>
   <label class="sw" for="audio"><span class="ico">{{i:volume-2}}</span><span class="t"><b>Partager le son</b><small>Son du PC (Chrome / Edge sous Windows)</small></span>
    <input type="checkbox" id="audio" role="switch" checked><span class="tog" aria-hidden="true"></span></label>
+  <label class="sw" for="ctl"><span class="ico">{{i:mouse-pointer-2}}</span><span class="t"><b>Autoriser le contrôle à distance</b><small id="ctls">Un spectateur pourra utiliser ta souris et ton clavier, seulement avec ton accord.</small></span>
+   <input type="checkbox" id="ctl" role="switch"><span class="tog" aria-hidden="true"></span></label>
   <div class="cta-row"><button class="btn p lg" id="go" type="button">{{i:monitor-up}}Partager mon écran</button><a class="btn s lg" href="#comment">Comment ça marche</a></div>
   <div id="err" role="alert">{{i:triangle-alert}}<span id="errt"></span></div>
  </div>
@@ -80,6 +85,8 @@ fieldset{border:0;padding:0;margin:0}legend{font-weight:600;font-size:14px;color
    <div class="field"><div class="k">{{i:key-round}}Code PIN</div>
     <div class="val"><output class="pinv">__PIN__</output><button class="btn s sm" id="cpin2" type="button" aria-label="Copier le code PIN">{{i:copy}}<span>Copier</span></button></div></div>
    <div class="q" id="q" hidden><span class="k">Qualité envoyée</span><b id="qv" class="num"></b><small id="qh"></small></div>
+   <div class="ctlbox" id="ctlbox" hidden><div class="k">{{i:mouse-pointer-2}}Contrôle à distance</div><p id="ctlt"></p>
+    <div><button class="btn s sm" id="ctlbtn" type="button"></button></div></div>
    <div class="empty" id="empty">{{i:hourglass}}<span>En attente de spectateurs. Ouvre l'adresse sur l'autre appareil, ou scanne le QR code.</span></div>
    <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
     <button class="btn s" id="direct" type="button" data-link="__DIRECT__">{{i:link}}<span>Copier le lien direct</span></button>
@@ -144,6 +151,10 @@ fieldset{border:0;padding:0;margin:0}legend{font-weight:600;font-size:14px;color
  <div><h4>Technique</h4><a href="/help#faq">Questions fréquentes</a><a href="/help#faq">Pair‑à‑pair WebRTC</a><a href="?demo">Mode démo</a></div>
 </div><div class="bot"><span>© LanShare — fonctionne en local</span><span>Adresse de ce PC : <span class="num">__IP__:__PORT__</span></span></div></div></footer>
 
+<dialog id="reqd" aria-labelledby="reqt"><h3 id="reqt">Un appareil demande le contrôle</h3>
+ <p class="mut" style="margin:10px 0 4px">Appareil : <b class="num" id="reqip" style="color:var(--fg)"></b></p>
+ <p class="mut">S'il accepte, il pourra déplacer la souris, cliquer et taper au clavier sur ce PC. Tu pourras reprendre la main à tout moment.</p>
+ <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px"><button class="btn s" id="rdeny" type="button" autofocus>Refuser</button><button class="btn p" id="rok" type="button">Autoriser</button></div></dialog>
 <script src="/web/shared.js"></script><script src="/web/qr.js"></script>
 <script>
 const LAN_IP="__IP__", DEMO=location.search.includes('demo');
@@ -167,6 +178,27 @@ function demoStream(){const c=document.createElement('canvas');c.width=1280;c.he
   setInterval(()=>{t++;g.fillStyle='#123';g.fillRect(0,0,1280,720);g.fillStyle='#22c55e';g.fillRect((t*8)%1200,300,80,80);
   g.fillStyle='#fff';g.font='48px sans-serif';g.fillText('LanShare demo '+new Date().toLocaleTimeString(),40,80);},33);
   return c.captureStream(30);}
+/* ---- Contrôle à distance ---- */
+let CAPS={ok:false,reason:''},ctlOn=false,ctlActive=false,reqQ=[],titleBase=document.title;
+fetch('/control/caps').then(r=>r.json()).then(c=>{CAPS=c;if(!c.ok){$('ctl').disabled=true;$('ctls').textContent=c.reason||'Indisponible sur ce système.';}}).catch(()=>{});
+$('ctl').onchange=()=>{if($('ctl').checked&&'Notification' in window&&Notification.permission==='default')Notification.requestPermission();};
+function ctlUI(){const box=$('ctlbox');box.hidden=!CAPS.ok;box.classList.toggle('active',ctlActive);
+  if(ctlActive){$('ctlt').textContent='Un spectateur contrôle ton PC en ce moment.';$('ctlbtn').className='btn d sm';$('ctlbtn').innerHTML=ic('hand')+'Reprendre le contrôle';}
+  else if(ctlOn){$('ctlt').textContent='Autorisé. Un spectateur doit d\'abord te le demander, tu pourras accepter ou refuser.';$('ctlbtn').className='btn s sm';$('ctlbtn').innerHTML=ic('x')+'Désactiver le contrôle';}
+  else{$('ctlt').textContent='Désactivé : les spectateurs ne peuvent pas agir sur ton PC.';$('ctlbtn').className='btn s sm';$('ctlbtn').innerHTML=ic('mouse-pointer-2')+'Autoriser le contrôle';}}
+async function setControl(on){
+  if(on){const t=stream&&stream.getVideoTracks()[0],st=t?t.getSettings():{};
+    if(!DEMO&&st.displaySurface&&st.displaySurface!=='monitor'){ctlOn=false;$('ctlt').textContent='Le contrôle à distance nécessite de partager l\'écran entier (pas une fenêtre ni un onglet).';return;}
+    const r=await fetch('/control/enable',{method:'POST',body:JSON.stringify({on:true,w:st.width||0,h:st.height||0})});ctlOn=r.ok;}
+  else{await fetch('/control/enable',{method:'POST',body:JSON.stringify({on:false})});ctlOn=false;ctlActive=false;}
+  ctlUI();}
+$('ctlbtn').onclick=async()=>{if(ctlActive){await fetch('/control/revoke',{method:'POST',body:'{}'});}else await setControl(!ctlOn);};
+function nextReq(){const d=$('reqd');if(d.open||!reqQ.length)return;const r=reqQ.shift();$('reqip').textContent=r.ip||'inconnu';d.dataset.id=r.from;d.showModal();}
+async function answer(allow){const d=$('reqd'),id=d.dataset.id;d.close();document.title=titleBase;
+  await fetch('/control/grant',{method:'POST',body:JSON.stringify({id,allow})});nextReq();}
+$('rok').onclick=()=>answer(true);$('rdeny').onclick=()=>answer(false);$('reqd').addEventListener('cancel',e=>{e.preventDefault();answer(false);});
+function notifyReq(){document.title='(1) Demande de contrôle';$('live-msg').textContent='Un appareil demande le contrôle de ton PC';
+  try{if(Notification.permission==='granted')new Notification('LanShare',{body:'Un appareil demande le contrôle de ton PC.'});}catch(_){}}
 $('go').onclick=async()=>{
   showErr('');const b=$('go');b.disabled=true;b.innerHTML=ic('loader-circle','spin')+'Choisis ton écran…';
   const mode=document.querySelector('input[name=mode]:checked').value;
@@ -174,14 +206,18 @@ $('go').onclick=async()=>{
   catch(e){b.disabled=false;b.innerHTML=ic('monitor-up')+'Partager mon écran';
     showErr(e.name==='NotAllowedError'?'Partage annulé. Clique à nouveau et choisis un écran ou une fenêtre.':'Impossible de capturer l\'écran : '+e.message);return;}
   const v=stream.getVideoTracks()[0];v.contentHint=PROFILES[mode].hint;v.onended=stop;window.__mode=mode;
-  $('prev').srcObject=stream;$('setup').hidden=true;$('live').hidden=false;try{drawQR("__DIRECT__");}catch(_){$('qr').hidden=true;}
+  $('prev').srcObject=stream;$('setup').hidden=true;$('live').hidden=false;ctlOn=false;ctlActive=false;ctlUI();try{drawQR("__DIRECT__");}catch(_){$('qr').hidden=true;}
   $('live-msg').textContent='Partage démarré';
   es=new EventSource('/events?role=sender');
   es.onmessage=async e=>{const m=JSON.parse(e.data);
     if(m.type==='viewer-joined')addViewer(m.id);
     else if(m.type==='viewer-left')drop(m.id);
     else if(m.type==='answer'&&pcs[m.from])try{await pcs[m.from].setRemoteDescription({type:'answer',sdp:m.sdp});}catch(_){}
+    else if(m.type==='control-request'){reqQ.push(m);notifyReq();nextReq();}
+    else if(m.type==='control-active'){ctlActive=true;ctlUI();$('live-msg').textContent='Un spectateur contrôle ton PC';}
+    else if(m.type==='control-released'){ctlActive=false;ctlUI();$('live-msg').textContent='Le contrôle est terminé';}
     else if(m.type==='replaced')stop();};
+  setControl($('ctl').checked&&CAPS.ok);
 };
 let lastB=0,lastT=0;
 setInterval(async()=>{const pc=Object.values(pcs).find(p=>p.connectionState==='connected');$('q').hidden=!pc;if(!pc)return;
@@ -212,7 +248,7 @@ async function addViewer(id){
   await pc.setLocalDescription(await pc.createOffer());await gathered(pc);
   post({role:'sender',to:id,type:'offer',sdp:fixSdp(pc.localDescription.sdp,LAN_IP)});
 }
-function stop(){fetch('/bye',{method:'POST'});if(es)es.close();Object.keys(pcs).forEach(drop);
+function stop(){ctlOn=ctlActive=false;reqQ=[];if($('reqd').open)$('reqd').close();fetch('/bye',{method:'POST'});if(es)es.close();Object.keys(pcs).forEach(drop);
   if(stream)stream.getTracks().forEach(t=>t.stop());$('live').hidden=true;$('setup').hidden=false;
   const b=$('go');b.disabled=false;b.innerHTML=ic('monitor-up')+'Partager mon écran';$('live-msg').textContent='Partage arrêté';b.focus();}
 $('stop').onclick=stop;addEventListener('pagehide',()=>navigator.sendBeacon('/bye'));

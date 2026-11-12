@@ -62,6 +62,13 @@ section{padding:34px 0}section>h2{font-size:clamp(22px,3.5vw,30px);margin-bottom
   <li>Texte flou ? Choisis « Netteté maximale » (codec VP9, jusqu'à 30 Mb/s, la résolution est conservée). Saccades ou PC qui chauffe ? Choisis « Vidéo et jeux » (relance le partage après changement). L'encart « Qualité envoyée » de la page de partage indique ce qui limite l'image (réseau ou PC).</li>
   <li>Partage une <b>fenêtre</b> plutôt que tout un écran 4K et ferme les applications lourdes.</li>
   <li>Plusieurs spectateurs demandent plus de puissance au PC : limite‑les si besoin.</li></ul></div></details>
+ <details><summary>{{i:mouse-pointer-2:l}}Le bouton « Contrôler » n'apparaît pas ou ne marche pas{{i:chevron-down:ch}}</summary><div class="a"><ul>
+  <li>Sur le PC, active <b>« Autoriser le contrôle à distance »</b> avant (ou pendant) le partage.</li>
+  <li>Il faut partager <b>l'écran entier</b>, pas une fenêtre ni un onglet.</li>
+  <li><b>Windows</b> et <b>Linux avec X11</b> sont pris en charge. Wayland et macOS ne le sont pas encore.</li>
+  <li>Linux : installe la bibliothèque XTest si besoin (<code>sudo apt install libxtst6</code>).</li>
+  <li>Les fenêtres lancées « en administrateur » ne réagissent pas, sauf si LanShare est lui aussi lancé en administrateur.</li>
+  <li>Si le PC ne répond pas à la demande pendant 60 secondes, elle expire : redemande.</li></ul></div></details>
  <details><summary>{{i:key-round:l}}J'ai oublié le PIN{{i:chevron-down:ch}}</summary><div class="a"><p>Il est affiché dans le bandeau en haut de la page de partage et dans le terminal. Tu peux aussi le fixer au lancement : <code>python lanshare_rtc.py --pin 1234</code>. Après 5 erreurs, patiente 30 secondes.</p></div></details>
  <details><summary>{{i:plug:l}}Le port 8080 est déjà utilisé{{i:chevron-down:ch}}</summary><div class="a"><p>LanShare choisit automatiquement le port libre suivant et l'affiche. Pour imposer un port : <code>python lanshare_rtc.py --port 9000</code>.</p></div></details>
 </section>
@@ -81,6 +88,14 @@ sudo ufw allow from 192.168.1.0/24 to any proto udp</pre></div></details>
  <details><summary>{{i:shield-check:l}}Est‑ce sécurisé ?{{i:chevron-down:ch}}</summary><div class="a"><p>Le flux WebRTC est chiffré. L'accès est protégé par un PIN, et seul le PC lui‑même peut lancer un partage. N'utilise pas <code>--no-pin</code> sur un réseau public.</p></div></details>
  <details><summary>{{i:smartphone:l}}Ça marche sur une TV, un iPhone, une tablette ?{{i:chevron-down:ch}}</summary><div class="a"><p>Oui si l'appareil a un navigateur moderne : Chrome, Edge, Firefox, Safari (iPhone, iPad, Mac), navigateur d'une Smart TV récente ou d'Android TV.</p></div></details>
  <details><summary>{{i:users:l}}Combien de spectateurs ?{{i:chevron-down:ch}}</summary><div class="a"><p>Plusieurs en même temps. Chacun reçoit son propre flux : 2 à 4 est un bon maximum selon la puissance du PC et du Wi‑Fi.</p></div></details>
+ <details><summary>{{i:mouse-pointer-click:l}}Comment contrôler le PC depuis l'autre appareil ?{{i:chevron-down:ch}}</summary><div class="a">
+  <p>Sur le PC, active « Autoriser le contrôle à distance ». Sur l'appareil qui regarde, clique sur <b>Contrôler</b> : le PC reçoit une demande et doit <b>l'accepter</b>. Ensuite la souris, le clavier et la molette sont transmis.</p>
+  <ul><li>Quitter : bouton « Quitter le contrôle » ou <code>Ctrl+Alt+Maj+Q</code>.</li>
+  <li>Le PC peut <b>reprendre la main</b> à tout moment avec le bouton rouge « Reprendre le contrôle ».</li>
+  <li>Un seul appareil contrôle à la fois. Le contrôle s'arrête si le partage s'arrête ou si l'appareil se déconnecte.</li>
+  <li>Téléphone ou tablette : toucher = clic, glisser = déplacer, appui long = clic droit, bouton « Clavier » pour écrire.</li>
+  <li>Non pris en charge : copier‑coller entre les deux appareils, Ctrl+Alt+Suppr, défilement à deux doigts.</li></ul></div></details>
+ <details><summary>{{i:shield-check:l}}Le contrôle à distance est‑il risqué ?{{i:chevron-down:ch}}</summary><div class="a"><p>Il est <b>désactivé par défaut</b>. Il faut que tu l'actives, puis que tu acceptes chaque demande en voyant l'adresse de l'appareil. Seul quelqu'un qui connaît le PIN peut demander. N'accepte que des appareils que tu reconnais, et n'utilise pas <code>--no-pin</code> avec le contrôle. Pour le bloquer complètement : <code>python lanshare_rtc.py --no-control</code>.</p></div></details>
  <details><summary>{{i:monitor-up:l}}Puis‑je partager depuis un téléphone ?{{i:chevron-down:ch}}</summary><div class="a"><p>Pas pour l'instant : le partage se lance depuis le PC où tourne LanShare. Le téléphone sert de spectateur.</p></div></details>
  <details><summary>{{i:square:l}}Comment arrêter ?{{i:chevron-down:ch}}</summary><div class="a"><p>Clique sur « Arrêter le partage », ou ferme le terminal (Ctrl+C). Les spectateurs repassent automatiquement en attente.</p></div></details>
 </section>
