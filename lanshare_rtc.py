@@ -17,7 +17,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
 
 BASE = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent))  # _MEIPASS : exe PyInstaller
-WEB = BASE / "web"
+WEB = (BASE / "web").resolve()  # résolu : comparé plus bas aux chemins résolus (noms courts Windows, liens)
 STATIC = {".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".svg": "image/svg+xml",
           ".woff2": "font/woff2"}
 _ICON = re.compile(r"\{\{i:([\w-]+)(?::(\w+))?\}\}")
