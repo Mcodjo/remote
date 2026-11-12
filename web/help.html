@@ -1,0 +1,121 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>LanShare — Aide</title><link rel="preload" href="/web/dm-sans.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="/web/app.css">
+<style>
+.hero{padding:52px 0 18px;text-align:center}.hero h1{font-size:clamp(30px,5vw,46px);margin:16px 0 10px}.hero p{color:var(--mut);font-size:18px;max-width:560px;margin:0 auto}
+.toc{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:24px 0 0}
+.toc a{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;background:var(--surface);border:1px solid var(--line);border-radius:99px;font-size:14.5px;font-weight:500;text-decoration:none}.toc a:hover{border-color:var(--acc)}
+.toc a .ic{color:var(--acc-fg)}
+section{padding:34px 0}section>h2{font-size:clamp(22px,3.5vw,30px);margin-bottom:6px;display:flex;align-items:center;gap:12px}section>h2 .ic{color:var(--acc-fg)}.lead{color:var(--mut);margin:0 0 20px}
+.res .chk{display:flex;gap:14px;align-items:flex-start;padding:14px 0;border-top:1px solid var(--line)}.res .chk:first-child{border-top:0;padding-top:4px}
+.res .chk .b{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:none}
+.chk.ok .b{background:var(--acc-soft);color:var(--ok)}.chk.warn .b{background:var(--warn-soft);color:var(--warn)}.chk.bad .b{background:var(--bad-soft);color:var(--bad)}
+.chk b{display:block}.chk small{display:block;color:var(--mut);font-size:14px;line-height:1.45}.chk .tag{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-left:8px}
+.chk.ok .tag{color:var(--ok)}.chk.warn .tag{color:var(--warn)}.chk.bad .tag{color:var(--bad)}
+.n{width:36px;height:36px;border-radius:50%;background:var(--acc);color:var(--on-acc);display:grid;place-items:center;font-weight:700;margin-bottom:14px}
+.final{text-align:center;padding:48px 20px;margin:30px 0}.final h2{font-size:clamp(24px,4vw,34px);margin-bottom:8px}.final>p{color:var(--mut);margin:0 0 22px}
+.cta-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+</style></head><body>
+<a class="skip" href="#diag">Aller au contenu</a><div id="live-msg" class="sr" role="status" aria-live="polite"></div>
+<nav class="top" aria-label="Navigation"><div class="wrap"><a class="brand" href="__HOME__"><i>{{i:cast}}</i>LanShare</a>
+ <div class="links"><a href="#diag">Diagnostic</a><a href="#demarrer">Démarrer</a><a href="#problemes">Dépannage</a><a href="#faq">Questions</a></div>
+ <div class="right"><a class="btn p sm" href="__HOME__">{{i:arrow-left}}Retour</a></div></div></nav>
+
+<header class="hero wrap"><span class="chip">{{i:life-buoy}}Centre d'aide</span><h1>Un souci ? On règle ça.</h1>
+ <p>Lance le diagnostic automatique, puis suis le guide qui correspond à ton problème.</p>
+ <div class="toc" aria-label="Sommaire"><a href="#diag">{{i:stethoscope}}Diagnostic</a><a href="#demarrer">{{i:rocket}}Démarrer</a><a href="#problemes">{{i:wrench}}Dépannage</a><a href="#pare-feu">{{i:brick-wall}}Pare‑feu</a><a href="#faq">{{i:circle-help}}Questions</a></div></header>
+
+<main class="wrap">
+<section id="diag"><h2>{{i:stethoscope:lg}}Diagnostic automatique</h2><p class="lead">Teste ce navigateur et le serveur en un clic.</p>
+ <div class="card"><div class="res" id="res" aria-busy="true"><div class="chk"><span class="b">{{i:loader-circle:spin}}</span><div><b>Test en cours…</b></div></div></div>
+ <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap"><button class="btn p" type="button" id="re">{{i:refresh-cw}}Relancer le diagnostic</button>
+ <button class="btn s" type="button" id="rep">{{i:clipboard-check}}<span>Copier le rapport</span></button></div></div></section>
+
+<section id="demarrer"><h2>{{i:rocket:lg}}Démarrer en 3 étapes</h2><p class="lead">Les deux appareils doivent être sur le même Wi‑Fi (ou le même réseau filaire).</p>
+ <div class="grid">
+  <div class="card"><div class="n">1</div><h3>Sur le PC</h3><p>Lance <code>start.bat</code> (ou <code>python lanshare_rtc.py</code>), puis clique sur « Partager mon écran ».</p></div>
+  <div class="card"><div class="n">2</div><h3>Sur l'autre appareil</h3><p>Ouvre l'adresse affichée (ex. <code>http://192.168.1.20:8080</code>) ou scanne le QR code.</p></div>
+  <div class="card"><div class="n">3</div><h3>Entre le PIN</h3><p>Tape le code à 4 chiffres. Avec le QR code ou le lien direct, il est déjà saisi.</p></div>
+ </div></section>
+
+<section id="problemes"><h2>{{i:wrench:lg}}Dépannage</h2><p class="lead">Clique sur ton symptôme.</p>
+ <details><summary>{{i:wifi-off:l}}L'autre appareil n'arrive pas à ouvrir l'adresse{{i:chevron-down:ch}}</summary><div class="a"><ul>
+  <li><b>Même réseau ?</b> Les deux appareils sur la même box ou le même Wi‑Fi. Pas un en 4G, pas un sur le « Wi‑Fi invité ».</li>
+  <li><b>Isolation des clients</b> (« AP isolation », fréquente sur les Wi‑Fi invités, hôtels, écoles) : elle bloque la communication entre appareils. Change de réseau ou utilise le partage de connexion d'un téléphone.</li>
+  <li><b>VPN actif</b> sur le PC ? Coupe‑le le temps du partage.</li>
+  <li><b>Pare‑feu</b> : voir la section dédiée plus bas.</li>
+  <li>Vérifie que tu tapes <code>http://</code> (pas https) et le bon port.</li></ul></div></details>
+ <details><summary>{{i:monitor:l}}La page s'ouvre mais l'image reste noire ou « Connexion au PC… »{{i:chevron-down:ch}}</summary><div class="a"><ul>
+  <li>Le partage est‑il toujours actif sur le PC ? Ne ferme pas l'onglet LanShare.</li>
+  <li>Le <b>pare‑feu bloque la vidéo</b> (UDP) même si la page s'ouvre : autorise Python ou le navigateur sur le réseau <b>privé</b>.</li>
+  <li>Attends 5 secondes, puis recharge la page du spectateur.</li>
+  <li>Teste avec <a href="__HOME__?demo" style="color:var(--acc-fg);font-weight:600">le mode démo</a> : s'il fonctionne, le problème vient de la capture d'écran, pas du réseau.</li></ul></div></details>
+ <details><summary>{{i:monitor-up:l}}Le bouton « Partager mon écran » ne fait rien ou affiche une erreur{{i:chevron-down:ch}}</summary><div class="a"><ul>
+  <li>La page de partage doit être ouverte via <code>http://localhost:…/share</code> sur le PC lui‑même (pas via l'adresse IP).</li>
+  <li>Utilise Chrome, Edge ou Firefox récents. Sous macOS, autorise l'enregistrement d'écran : <i>Réglages Système › Confidentialité et sécurité</i>.</li>
+  <li>« Partage annulé » : la fenêtre de sélection a été fermée, clique à nouveau.</li></ul></div></details>
+ <details><summary>{{i:volume-x:l}}Pas de son{{i:chevron-down:ch}}</summary><div class="a"><ul>
+  <li>Le son système n'est partagé que par <b>Chrome / Edge sous Windows</b> : choisis « Écran entier » et coche <b>« Partager le son du système »</b>.</li>
+  <li>Sous macOS et Linux, seul le son d'un <b>onglet</b> peut être partagé.</li>
+  <li>Côté spectateur, clique sur <b>« Activer le son »</b> (ou touche M) : les navigateurs bloquent le son automatique.</li></ul></div></details>
+ <details><summary>{{i:gauge:l}}L'image est saccadée, floue ou en retard{{i:chevron-down:ch}}</summary><div class="a"><ul>
+  <li>Mets le <b>spectateur en Wi‑Fi 5 GHz</b> ou en câble, et rapproche‑le de la box.</li>
+  <li>Texte flou ? Choisis « Texte et documents ». Saccades ? Choisis « Vidéo et jeux » (relance le partage après changement).</li>
+  <li>Partage une <b>fenêtre</b> plutôt que tout un écran 4K et ferme les applications lourdes.</li>
+  <li>Plusieurs spectateurs demandent plus de puissance au PC : limite‑les si besoin.</li></ul></div></details>
+ <details><summary>{{i:key-round:l}}J'ai oublié le PIN{{i:chevron-down:ch}}</summary><div class="a"><p>Il est affiché dans le bandeau en haut de la page de partage et dans le terminal. Tu peux aussi le fixer au lancement : <code>python lanshare_rtc.py --pin 1234</code>. Après 5 erreurs, patiente 30 secondes.</p></div></details>
+ <details><summary>{{i:plug:l}}Le port 8080 est déjà utilisé{{i:chevron-down:ch}}</summary><div class="a"><p>LanShare choisit automatiquement le port libre suivant et l'affiche. Pour imposer un port : <code>python lanshare_rtc.py --port 9000</code>.</p></div></details>
+</section>
+
+<section id="pare-feu"><h2>{{i:brick-wall:lg}}Pare‑feu</h2><p class="lead">À faire une seule fois sur le PC qui partage.</p>
+ <details open><summary>{{i:monitor:l}}Windows{{i:chevron-down:ch}}</summary><div class="a"><p>Au premier lancement, Windows demande l'accès réseau pour Python : coche <b>« Réseaux privés »</b> puis <b>Autoriser</b>. Si tu as cliqué sur « Annuler » :</p>
+  <p>Paramètres › Réseau et Internet › <i>Pare‑feu Windows Defender</i> › « Autoriser une application » › coche Python (réseau privé).</p>
+  <p>Vérifie aussi que le réseau est de type <b>Privé</b> (Paramètres › Wi‑Fi › ta connexion › Type de profil réseau).</p></div></details>
+ <details><summary>{{i:laptop:l}}macOS{{i:chevron-down:ch}}</summary><div class="a"><p>Réglages Système › Réseau › Pare‑feu : autorise les connexions entrantes pour Python, ou désactive le pare‑feu le temps du partage.</p></div></details>
+ <details><summary>{{i:terminal:l}}Linux{{i:chevron-down:ch}}</summary><div class="a"><p>Avec ufw, autorise le port et le trafic WebRTC local (remplace 192.168.1.0/24 par ton réseau) :</p>
+  <pre>sudo ufw allow from 192.168.1.0/24 to any port 8080 proto tcp
+sudo ufw allow from 192.168.1.0/24 to any proto udp</pre></div></details>
+</section>
+
+<section id="faq"><h2>{{i:circle-help:lg}}Questions fréquentes</h2><p class="lead">&nbsp;</p>
+ <details><summary>{{i:cloud-off:l}}Est‑ce que ça passe par Internet ?{{i:chevron-down:ch}}</summary><div class="a"><p>Non. La vidéo va directement du PC vers l'autre appareil (WebRTC pair‑à‑pair), sans serveur externe ni compte. Tu peux même couper Internet.</p></div></details>
+ <details><summary>{{i:shield-check:l}}Est‑ce sécurisé ?{{i:chevron-down:ch}}</summary><div class="a"><p>Le flux WebRTC est chiffré. L'accès est protégé par un PIN, et seul le PC lui‑même peut lancer un partage. N'utilise pas <code>--no-pin</code> sur un réseau public.</p></div></details>
+ <details><summary>{{i:smartphone:l}}Ça marche sur une TV, un iPhone, une tablette ?{{i:chevron-down:ch}}</summary><div class="a"><p>Oui si l'appareil a un navigateur moderne : Chrome, Edge, Firefox, Safari (iPhone, iPad, Mac), navigateur d'une Smart TV récente ou d'Android TV.</p></div></details>
+ <details><summary>{{i:users:l}}Combien de spectateurs ?{{i:chevron-down:ch}}</summary><div class="a"><p>Plusieurs en même temps. Chacun reçoit son propre flux : 2 à 4 est un bon maximum selon la puissance du PC et du Wi‑Fi.</p></div></details>
+ <details><summary>{{i:monitor-up:l}}Puis‑je partager depuis un téléphone ?{{i:chevron-down:ch}}</summary><div class="a"><p>Pas pour l'instant : le partage se lance depuis le PC où tourne LanShare. Le téléphone sert de spectateur.</p></div></details>
+ <details><summary>{{i:square:l}}Comment arrêter ?{{i:chevron-down:ch}}</summary><div class="a"><p>Clique sur « Arrêter le partage », ou ferme le terminal (Ctrl+C). Les spectateurs repassent automatiquement en attente.</p></div></details>
+</section>
+
+<div class="card final"><h2>Toujours bloqué ?</h2><p>Relance le diagnostic : il indique la cause la plus probable.</p>
+ <div class="cta-row"><a class="btn p lg" href="#diag">{{i:stethoscope}}Lancer le diagnostic</a><a class="btn s lg" href="__HOME__">{{i:arrow-left}}Retour à LanShare</a></div></div>
+</main>
+<footer><div class="wrap"><div class="bot" style="border:0;margin:0;padding:0"><span>© LanShare — fonctionne en local</span><span>Adresse de ce PC : <span class="num">__IP__:__PORT__</span></span></div></div></footer>
+
+<script src="/web/shared.js"></script>
+<script>
+const $=id=>document.getElementById(id);let report='';
+const L={ok:['circle-check','OK'],warn:['triangle-alert','À vérifier'],bad:['circle-x','Problème']};
+const row=(s,t,d)=>{report+=`[${L[s][1]}] ${t} — ${d||''}\n`;return `<div class="chk ${s}"><span class="b">${ic(L[s][0])}</span><div><b>${t}<span class="tag">${L[s][1]}</span></b><small>${d||''}</small></div></div>`;};
+async function diag(){
+  report='LanShare — diagnostic\n';$('res').setAttribute('aria-busy','true');
+  const out=[];const loc=['localhost','127.0.0.1'].includes(location.hostname);
+  out.push(row('ok','Serveur LanShare joignable','Ce navigateur parle bien au serveur ('+location.host+').'));
+  let st=null;try{st=await (await fetch('/status',{cache:'no-store'})).json();}catch(e){out.push(row('bad','Statut du serveur illisible',e.message));}
+  if(st){
+    out.push(st.sender?row('ok','Un partage est actif','Les spectateurs peuvent se connecter ('+st.viewers+' en ce moment).')
+      :row('warn','Aucun partage actif',loc?'Clique sur « Partager mon écran » depuis la page d\'accueil.':'Le PC n\'a pas encore démarré le partage.'));
+    out.push(st.ip!=='127.0.0.1'?row('ok','Adresse réseau du PC : '+st.ip,'Les autres appareils doivent ouvrir http://'+st.ip+':'+st.port+'/')
+      :row('bad','Aucun réseau détecté','Connecte le PC au Wi‑Fi ou à un câble réseau.'));
+    if(!loc&&location.hostname!==st.ip)out.push(row('warn','Tu utilises une autre adresse que celle du PC','Utilise plutôt http://'+st.ip+':'+st.port+'/'));
+  }
+  out.push(window.RTCPeerConnection?row('ok','WebRTC pris en charge','Ton navigateur sait recevoir la vidéo.'):row('bad','WebRTC indisponible','Navigateur trop ancien : utilise Chrome, Edge, Firefox ou Safari récent.'));
+  if(loc)out.push(navigator.mediaDevices&&navigator.mediaDevices.getDisplayMedia?row('ok','Capture d\'écran disponible','Ce navigateur peut partager l\'écran.'):row('bad','Capture d\'écran indisponible','Utilise Chrome, Edge ou Firefox sur un PC.'));
+  else out.push(row('warn','Capture d\'écran non testée ici','Le partage se lance uniquement depuis le PC (http://localhost).'));
+  try{const pc=new RTCPeerConnection({iceServers:[]});pc.createDataChannel('x');await pc.setLocalDescription(await pc.createOffer());
+    await new Promise(r=>{setTimeout(r,2000);pc.onicegatheringstatechange=()=>pc.iceGatheringState==='complete'&&r();});
+    const n=(pc.localDescription.sdp.match(/a=candidate/g)||[]).length;pc.close();
+    out.push(n>0?row('ok','Interface réseau WebRTC',n+' chemin(s) réseau détecté(s).'):row('bad','Aucun chemin réseau WebRTC','Un VPN ou une extension bloque peut‑être WebRTC.'));}
+  catch(e){out.push(row('bad','Test WebRTC échoué',e.message));}
+  $('res').innerHTML=out.join('');$('res').setAttribute('aria-busy','false');$('live-msg').textContent='Diagnostic terminé';window.__diag=out.length;
+}
+$('re').onclick=diag;$('rep').onclick=e=>copyText(report+'\nNavigateur : '+navigator.userAgent,e.currentTarget);diag();
+</script></body></html>

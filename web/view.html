@@ -1,0 +1,61 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="dark">
+<title>LanShare</title><link rel="preload" href="/web/dm-sans.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="/web/app.css">
+<style>
+:root{--bg:#000;--surface:#161a17;--fg:#f2f5f2;--mut:#a9b3ad;--line:#2a322c;--acc:#22c55e;--acc-h:#4ade80;--on-acc:#04210f;--sunken:#1d221e}
+body{background:#000;overflow:hidden;height:100vh;height:100dvh}
+video{width:100vw;height:100vh;height:100dvh;object-fit:contain;display:block;background:#000}
+.state{position:fixed;inset:0;display:grid;place-items:center;padding:24px;text-align:center}
+.state .box{max-width:420px}.state .ico{width:64px;height:64px;border-radius:18px;margin:0 auto 18px;background:#14301f;color:#86efac}.state h1{font-size:22px;margin-bottom:6px}.state p{color:var(--mut)}
+.state .acts{margin-top:20px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.bar{position:fixed;left:50%;transform:translate(-50%,0);bottom:max(18px,env(safe-area-inset-bottom));display:flex;gap:8px;align-items:center;background:rgba(22,26,23,.88);backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:16px;padding:8px;transition:opacity .25s,transform .25s var(--ease)}
+.bar.off{opacity:0;transform:translate(-50%,12px);pointer-events:none}
+.bar .btn{background:transparent;color:var(--fg);border:0;min-height:44px}.bar .btn:hover{background:#ffffff1a}.bar .btn[aria-pressed=true]{background:var(--acc);color:var(--on-acc)}
+.bar .sep{width:1px;height:26px;background:var(--line)}.stats{font-size:13px;color:var(--mut);padding:0 10px;font-variant-numeric:tabular-nums;white-space:nowrap}
+@media(max-width:560px){.bar .btn span{display:none}.bar .btn{padding:0 14px}}
+</style></head><body>
+<div id="live-msg" class="sr" role="status" aria-live="polite"></div>
+<video id="v" autoplay muted playsinline aria-label="Écran partagé"></video>
+<div class="state" id="st" role="status"><div class="box"><div class="ico" id="sti">{{i:loader-circle:lg}}</div><h1 id="stt">Connexion…</h1><p id="msg"></p>
+ <div class="acts" id="sta" hidden><a class="btn s" href="/help">{{i:life-buoy}}Besoin d'aide ?</a></div></div></div>
+<div class="bar off" id="bar" role="toolbar" aria-label="Commandes du lecteur">
+ <button class="btn" id="snd" type="button" aria-pressed="false" aria-label="Activer le son (M)">{{i:volume-x}}<span>Activer le son</span></button>
+ <button class="btn" id="fs" type="button" aria-label="Plein écran (F)">{{i:maximize}}<span>Plein écran</span></button>
+ <span class="sep" aria-hidden="true"></span><span class="stats" id="info" aria-label="Qualité du flux"></span>
+ <a class="btn" href="/help" aria-label="Aide">{{i:circle-help}}<span>Aide</span></a></div>
+<script src="/web/shared.js"></script>
+<script>
+const ID=Math.random().toString(36).slice(2)+Date.now().toString(36);
+const $=id=>document.getElementById(id),v=$('v'),bar=$('bar');let pc=null,myIp='',timer,hideT,playing=false;
+function say(title,msg,icon,spin,help){$('st').hidden=!title;$('stt').textContent=title||'';$('msg').textContent=msg||'';
+  $('sti').innerHTML=ic(icon||'loader-circle','lg'+(spin?' spin':''));$('sta').hidden=!help;$('live-msg').textContent=title||'Connecté';}
+function wake(){bar.classList.remove('off');clearTimeout(hideT);if(playing)hideT=setTimeout(()=>{if(!bar.contains(document.activeElement))bar.classList.add('off');},3500);}
+['pointermove','pointerdown','keydown','touchstart'].forEach(e=>addEventListener(e,wake,{passive:true}));bar.addEventListener('focusin',wake);
+function closePc(){clearInterval(timer);if(pc){pc.close();pc=null;}v.srcObject=null;$('info').textContent='';playing=false;wake();}
+async function onOffer(m){
+  closePc();say('Connexion au PC…','Établissement de la liaison directe.','loader-circle',true);
+  pc=new RTCPeerConnection({iceServers:[]});const me=pc;
+  pc.ontrack=e=>{if(v.srcObject!==e.streams[0])v.srcObject=e.streams[0];try{e.receiver.jitterBufferTarget=50;}catch(_){}};
+  pc.onconnectionstatechange=()=>{if(me!==pc)return;
+    if(pc.connectionState==='connected'){say('');playing=true;v.play().catch(()=>{});wake();}
+    else if(['failed','disconnected'].includes(pc.connectionState)){playing=false;say('Connexion perdue','Nouvelle tentative en cours…','wifi-off',false,true);}};
+  await pc.setRemoteDescription({type:'offer',sdp:m.sdp});
+  await pc.setLocalDescription(await pc.createAnswer());await gathered(pc);
+  post({role:'viewer',id:ID,type:'answer',sdp:fixSdp(pc.localDescription.sdp,myIp)});
+  timer=setInterval(async()=>{if(!pc)return;for(const r of (await pc.getStats()).values())
+    if(r.type==='inbound-rtp'&&r.kind==='video'){window.__stats=r;$('info').textContent=(r.frameWidth||'?')+'×'+(r.frameHeight||'?')+' · '+Math.round(r.framesPerSecond||0)+' i/s';}},1000);
+}
+const es=new EventSource('/events?role=viewer&id='+ID);
+es.onmessage=e=>{const m=JSON.parse(e.data);
+  if(m.type==='hello'){myIp=m.ip;m.sender?say('Connexion au PC…','','loader-circle',true):say('En attente du partage','Le PC n\'a pas encore démarré le partage. Cette page se connectera toute seule.','hourglass',false,true);}
+  else if(m.type==='offer')onOffer(m);
+  else if(m.type==='sender-left'){closePc();say('Le partage est terminé','En attente d\'un nouveau partage…','monitor',false,true);}};
+es.onerror=()=>{playing=false;say('Connexion au PC perdue','Nouvelle tentative…','wifi-off',false,true);};
+function setMuted(m){v.muted=m;v.play().catch(()=>{});const b=$('snd');b.setAttribute('aria-pressed',String(!m));
+  b.innerHTML=ic(m?'volume-x':'volume-2')+'<span>'+(m?'Activer le son':'Son activé')+'</span>';b.setAttribute('aria-label',m?'Activer le son (M)':'Couper le son (M)');}
+function fs(){const d=document;if(d.fullscreenElement){d.exitFullscreen();}else if(d.documentElement.requestFullscreen)d.documentElement.requestFullscreen();else if(v.webkitEnterFullscreen)v.webkitEnterFullscreen();}
+$('snd').onclick=()=>setMuted(!v.muted);$('fs').onclick=fs;v.ondblclick=fs;
+addEventListener('keydown',e=>{if(e.target.closest&&e.target.closest('a,button')&&e.key!=='f'&&e.key!=='m')return;
+  if(e.key==='f'||e.key==='F')fs();else if(e.key==='m'||e.key==='M')setMuted(!v.muted);});
+document.addEventListener('fullscreenchange',()=>{$('fs').innerHTML=ic(document.fullscreenElement?'minimize':'maximize')+'<span>'+(document.fullscreenElement?'Quitter':'Plein écran')+'</span>';});
+</script></body></html>

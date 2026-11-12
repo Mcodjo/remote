@@ -1,0 +1,200 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LanShare — Partager mon écran</title><meta name="color-scheme" content="light dark">
+<link rel="preload" href="/web/dm-sans.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="/web/app.css">
+<style>
+.promo{background:var(--acc-soft);border-bottom:1px solid var(--line);font-size:14px}
+.promo .wrap{display:flex;gap:12px;justify-content:center;align-items:center;padding:8px 20px;flex-wrap:wrap;color:var(--acc-fg);font-weight:500}
+.promo b.pin{font-size:17px;letter-spacing:.22em;font-variant-numeric:tabular-nums;background:var(--surface);border:1px dashed var(--acc);border-radius:9px;padding:2px 12px;color:var(--fg)}
+.hero{text-align:center;padding:68px 0 44px}
+.hero h1{font-size:clamp(34px,6vw,58px);margin:18px auto 14px;max-width:780px;line-height:1.06}.hero h1 em{font-style:normal;color:var(--acc)}
+.sub{color:var(--mut);font-size:19px;max-width:620px;margin:0 auto 30px}
+.setup{max-width:620px;margin:0 auto;text-align:left}
+fieldset{border:0;padding:0;margin:0}legend{font-weight:600;font-size:14px;color:var(--mut);margin-bottom:10px;padding:0}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mode{position:relative}.mode input{position:absolute;opacity:0;inset:0;cursor:pointer;width:100%;height:100%;margin:0}
+.mode label{display:flex;gap:12px;align-items:flex-start;padding:14px;border:1.5px solid var(--line);border-radius:14px;background:var(--surface);min-height:76px;transition:border-color .18s,background .18s}
+.mode label .ico{margin:0;flex:none}.mode label span b{display:block}.mode label span small{color:var(--mut);font-size:13.5px;line-height:1.35;display:block}
+.mode input:checked+label{border-color:var(--acc);background:var(--acc-soft)}.mode input:focus-visible+label{outline:3px solid var(--ring);outline-offset:2px}
+.sw{display:flex;align-items:center;gap:14px;margin:14px 0 22px;padding:12px 14px;border:1.5px solid var(--line);border-radius:14px;background:var(--surface);cursor:pointer;min-height:64px}
+.sw .ico{margin:0}.sw .t{flex:1}.sw .t b{display:block}.sw .t small{color:var(--mut);font-size:13.5px}
+.sw input{position:absolute;opacity:0}.sw .tog{width:48px;height:28px;border-radius:99px;background:var(--line);position:relative;transition:background .18s;flex:none}
+.sw .tog:after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .18s var(--ease)}
+.sw input:checked~.tog{background:var(--acc)}.sw input:checked~.tog:after{transform:translateX(20px)}.sw input:focus-visible~.tog{outline:3px solid var(--ring);outline-offset:2px}
+.cta-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+#err{margin-top:14px;display:none;align-items:center;gap:10px;justify-content:center;color:var(--bad);background:var(--bad-soft);border-radius:12px;padding:10px 14px;font-size:14.5px}#err.show{display:flex}
+/* état partage actif */
+.live{max-width:900px;margin:0 auto;text-align:left;display:grid;grid-template-columns:1.25fr 1fr;gap:20px;align-items:start}
+.status{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 0 var(--ok);animation:pulse 1.8s infinite}@keyframes pulse{70%{box-shadow:0 0 0 9px transparent}}
+.field{margin-top:14px}.field .k{display:flex;align-items:center;gap:7px;color:var(--mut);font-size:13px;font-weight:600;margin-bottom:6px}
+.val{display:flex;align-items:center;gap:10px;background:var(--sunken);border:1px solid var(--line);border-radius:12px;padding:8px 8px 8px 16px}
+.val output{flex:1;font-size:clamp(18px,3vw,23px);font-weight:700;color:var(--acc-fg);word-break:break-all;font-variant-numeric:tabular-nums}
+.val output.pinv{letter-spacing:.28em}
+.qr{background:#fff;border-radius:14px;padding:14px;width:min(100%,230px);margin:0 auto;border:1px solid var(--line)}.qr svg{display:block;width:100%;height:auto}
+.side{text-align:center}.side video{width:100%;border-radius:12px;background:#000;margin-top:16px;max-height:170px;object-fit:contain}.side .cap{font-size:13.5px;color:var(--mut);margin-top:10px}
+.empty{display:flex;gap:10px;align-items:flex-start;background:var(--sunken);border-radius:12px;padding:12px 14px;margin-top:16px;font-size:14.5px;color:var(--mut)}
+.feat{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card.big{grid-column:1/-1;display:grid;grid-template-columns:1fr 1.1fr;gap:28px;align-items:center}
+.mock{margin-top:16px;background:var(--sunken);border:1px solid var(--line);border-radius:12px;padding:12px;font-size:13.5px;color:var(--mut);min-height:54px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mock.c{justify-content:space-between}.mock hr{flex:1;border:0;border-top:2px dashed var(--acc);margin:0}.mock .ic{width:1.7em;height:1.7em;color:var(--fg)}
+.eq{display:flex;gap:4px;align-items:flex-end;height:30px;width:100%}.eq i{flex:1;background:var(--acc);border-radius:3px;animation:eq 1.2s ease-in-out infinite;height:30%}
+.eq i:nth-child(2n){animation-delay:.3s}.eq i:nth-child(3n){animation-delay:.6s}@keyframes eq{0%,100%{height:20%}50%{height:100%}}
+.pins{display:flex;gap:8px;width:100%}.pins i{flex:1;height:36px;border-radius:9px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;font-style:normal;font-weight:700}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center}.two h2{font-size:clamp(26px,4vw,36px);margin-bottom:10px}.two>div>p{color:var(--mut)}
+.steps .n{width:36px;height:36px;border-radius:50%;background:var(--acc);color:var(--on-acc);display:grid;place-items:center;font-weight:700;margin-bottom:14px}
+.final{text-align:center;padding:56px 20px}.final h2{font-size:clamp(26px,4vw,40px);margin-bottom:8px}.final>p{color:var(--mut);margin:0 0 24px;font-size:17px}.final small{display:block;margin-top:18px;color:var(--mut)}
+@media(max-width:820px){.live,.two,.feat,.card.big,.modes{grid-template-columns:1fr}.hero{padding-top:40px}}
+</style></head><body>
+<a class="skip" href="#top">Aller au contenu</a>
+<div id="live-msg" class="sr" role="status" aria-live="polite"></div>
+<nav class="top" aria-label="Navigation principale"><div class="wrap">
+ <a class="brand" href="#top"><i>{{i:cast}}</i>LanShare</a>
+ <div class="links"><a href="#fonctions">Fonctionnalités</a><a href="#comment">Comment ça marche</a><a href="#usages">Cas d'usage</a><a href="/help">Aide</a></div>
+ <div class="right"><a class="btn s sm" href="/help">{{i:life-buoy}}Aide</a><a class="btn p sm" href="#top">{{i:monitor-up}}Partager</a></div></div></nav>
+
+<div class="promo"><div class="wrap">{{i:shield-check}}<span>Code PIN à donner aux spectateurs</span><b class="pin" id="pinv">__PIN__</b>
+ <button class="btn s sm" id="cpin" type="button" aria-label="Copier le code PIN">{{i:copy}}<span>Copier</span></button></div></div>
+
+<header class="hero wrap" id="top">
+ <span class="chip">{{i:wifi}}Réseau local · Sans Internet · Sans compte</span>
+ <h1>Affiche l'écran de ton PC sur <em>n'importe quel appareil</em></h1>
+ <p class="sub">Comme sur une télé, mais en direct sur ton réseau Wi‑Fi : la vidéo et le son passent directement d'un appareil à l'autre.</p>
+
+ <div id="setup" class="setup">
+  <fieldset><legend>Type de contenu</legend><div class="modes">
+   <div class="mode"><input type="radio" name="mode" id="m1" value="detail"><label for="m1"><span class="ico">{{i:type}}</span><span><b>Texte et documents</b><small>Image nette, idéale pour lire et présenter</small></span></label></div>
+   <div class="mode"><input type="radio" name="mode" id="m2" value="motion" checked><label for="m2"><span class="ico">{{i:video}}</span><span><b>Vidéo et jeux</b><small>Mouvement fluide, idéal pour les films</small></span></label></div>
+  </div></fieldset>
+  <label class="sw" for="audio"><span class="ico">{{i:volume-2}}</span><span class="t"><b>Partager le son</b><small>Son du PC (Chrome / Edge sous Windows)</small></span>
+   <input type="checkbox" id="audio" role="switch" checked><span class="tog" aria-hidden="true"></span></label>
+  <div class="cta-row"><button class="btn p lg" id="go" type="button">{{i:monitor-up}}Partager mon écran</button><a class="btn s lg" href="#comment">Comment ça marche</a></div>
+  <div id="err" role="alert">{{i:triangle-alert}}<span id="errt"></span></div>
+ </div>
+
+ <div class="live" id="live" hidden>
+  <div class="card">
+   <div class="status"><span class="dot" aria-hidden="true"></span><b>Partage en cours</b><span class="chip" id="cnt">{{i:users}}<span id="n">0</span>&nbsp;spectateur<span id="s"></span></span></div>
+   <div class="field"><div class="k">{{i:link}}Adresse à ouvrir sur l'autre appareil</div>
+    <div class="val"><output id="urlv">__URL__</output><button class="btn s sm" id="curl" type="button" aria-label="Copier l'adresse">{{i:copy}}<span>Copier</span></button></div></div>
+   <div class="field"><div class="k">{{i:key-round}}Code PIN</div>
+    <div class="val"><output class="pinv">__PIN__</output><button class="btn s sm" id="cpin2" type="button" aria-label="Copier le code PIN">{{i:copy}}<span>Copier</span></button></div></div>
+   <div class="empty" id="empty">{{i:hourglass}}<span>En attente de spectateurs. Ouvre l'adresse sur l'autre appareil, ou scanne le QR code.</span></div>
+   <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
+    <button class="btn s" id="direct" type="button" data-link="__DIRECT__">{{i:link}}<span>Copier le lien direct</span></button>
+    <button class="btn s" id="stop" type="button">{{i:square}}Arrêter le partage</button></div>
+  </div>
+  <div class="card side">
+   <div class="qr" id="qr" role="img" aria-label="QR code du lien direct avec le PIN"></div>
+   <p class="cap">Scanne avec un téléphone : le PIN est déjà inclus.</p>
+   <video id="prev" muted autoplay playsinline aria-label="Aperçu de ton partage"></video>
+  </div>
+ </div>
+</header>
+
+<section id="fonctions"><div class="wrap">
+ <div class="head"><h2>Tout ce qu'il faut, rien de superflu</h2><p>Pensé pour le réseau local : rapide, privé, sans installation côté spectateur.</p></div>
+ <div class="feat">
+  <div class="card big"><div><div class="ico">{{i:monitor-up}}</div><h3>Partage en un clic</h3><p>Choisis l'écran ou la fenêtre, c'est parti.</p>
+    <ul class="ck"><li>Écran entier, fenêtre ou onglet au choix</li><li>Curseur de la souris visible</li><li>Mode « texte net » ou « vidéo fluide »</li><li>Reconnexion automatique si le Wi‑Fi coupe</li></ul></div>
+   <div class="win" aria-hidden="true"><div class="bar"><b></b><b></b><b></b>&nbsp; Mon écran</div><div class="scr"></div></div></div>
+  <div class="card"><div class="ico">{{i:network}}</div><h3>Pair‑à‑pair</h3><p>Aucun cloud : la vidéo ne quitte pas ta maison.</p><div class="mock c" aria-hidden="true">{{i:laptop}}<hr>{{i:tv}}</div></div>
+  <div class="card"><div class="ico">{{i:volume-2}}</div><h3>Son inclus</h3><p>Partage aussi le son (Chrome / Edge sous Windows).</p><div class="mock" aria-hidden="true"><div class="eq"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div></div>
+  <div class="card"><div class="ico">{{i:lock}}</div><h3>Protégé par PIN</h3><p>Seuls ceux qui ont le code voient ton écran.</p><div class="mock" aria-hidden="true"><div class="pins"><i>•</i><i>•</i><i>•</i><i>•</i></div></div></div>
+  <div class="card"><div class="ico">{{i:users}}</div><h3>Plusieurs spectateurs</h3><p>PC, TV, tablette, téléphone : tous en même temps.</p><div class="mock" aria-hidden="true">{{i:laptop}}{{i:tv}}{{i:smartphone}}{{i:tablet}}</div></div>
+  <div class="card"><div class="ico">{{i:plug}}</div><h3>Zéro installation</h3><p>Le spectateur n'a besoin que d'un navigateur.</p><div class="mock" aria-hidden="true">http://<b style="color:var(--acc-fg)">192.168.x.x</b>:8080</div></div>
+  <div class="card"><div class="ico">{{i:zap}}</div><h3>Basse latence</h3><p>Réglé pour le temps réel sur ton réseau.</p><div class="mock" aria-hidden="true">{{i:activity}}Connexion directe (LAN)</div></div>
+ </div></div></section>
+
+<section id="comment"><div class="wrap two">
+ <div><h2>Côté spectateur, c'est simple</h2><p>Ouvre l'adresse, tape le PIN : l'écran s'affiche. Rien d'autre à faire.</p>
+  <ul class="ck"><li>Plein écran en un clic (ou touche F)</li><li>Bouton pour activer le son (touche M)</li><li>Résolution et images par seconde affichées</li><li>Attend tout seul si le partage n'a pas encore démarré</li></ul>
+  <p style="margin-top:20px"><button class="btn p" type="button" onclick="go()">{{i:monitor-up}}Démarrer un partage</button></p></div>
+ <div class="win" aria-hidden="true"><div class="bar">{{i:lock}}&nbsp;Connecté<span class="chip" style="margin-left:auto">En direct</span></div>
+  <div class="scr" style="aspect-ratio:4/3"></div>
+  <div class="bar" style="border-top:1px solid var(--line);border-bottom:0;gap:14px">{{i:volume-2}}Son{{i:maximize}}<span style="margin-left:auto">Plein écran</span></div></div>
+</div></section>
+
+<section><div class="wrap steps">
+ <div class="head"><h2>En trois étapes</h2><p>Moins d'une minute, du premier clic à l'affichage.</p></div>
+ <div class="grid">
+  <div class="card"><div class="n">1</div><h3>Partage</h3><p>Clique sur « Partager mon écran » et choisis ce que tu veux montrer.</p></div>
+  <div class="card"><div class="n">2</div><h3>Ouvre l'adresse</h3><p>Sur l'autre appareil, saisis l'adresse, ou scanne le QR code.</p></div>
+  <div class="card"><div class="n">3</div><h3>Profite</h3><p>Entre le PIN : ton écran apparaît, avec le son si tu l'as activé.</p></div>
+ </div></div></section>
+
+<section id="usages"><div class="wrap">
+ <div class="head"><h2>Pour quels usages ?</h2><p>Tout ce qu'on fait habituellement avec un câble HDMI.</p></div>
+ <div class="grid">
+  <div class="card"><div class="ico">{{i:presentation}}</div><h3>Présenter</h3><p>Lance une présentation ou un document depuis ton PC et toute la salle le voit sur la TV.</p></div>
+  <div class="card"><div class="ico">{{i:clapperboard}}</div><h3>Regarder</h3><p>Un film, des photos ou un jeu sur le grand écran, sans câble ni clé à brancher.</p></div>
+  <div class="card"><div class="ico">{{i:monitor-play}}</div><h3>Suivre</h3><p>Une tablette ou un second PC comme écran supplémentaire pour suivre une page.</p></div>
+ </div></div></section>
+
+<section><div class="wrap"><div class="card final">
+ <h2>Prêt à partager ton écran ?</h2><p>Un clic, une adresse, un PIN. C'est tout.</p>
+ <div class="cta-row"><button class="btn p lg" type="button" onclick="go()">{{i:monitor-up}}Partager mon écran</button><a class="btn s lg" href="/help">{{i:life-buoy}}Besoin d'aide ?</a></div>
+ <small>Gratuit · Fonctionne hors ligne · Rien n'est envoyé sur Internet</small></div></div></section>
+
+<footer><div class="wrap"><div class="cols">
+ <div><a class="brand" href="#top" style="padding-bottom:10px"><i>{{i:cast}}</i>LanShare</a>Partage d'écran WebRTC pour ton réseau local.</div>
+ <div><h4>Produit</h4><a href="#fonctions">Fonctionnalités</a><a href="#comment">Comment ça marche</a><a href="#usages">Cas d'usage</a></div>
+ <div><h4>Aide</h4><a href="/help#diag">Diagnostic automatique</a><a href="/help#problemes">Dépannage</a><a href="/help#pare-feu">Pare‑feu</a></div>
+ <div><h4>Technique</h4><a href="/help#faq">Questions fréquentes</a><a href="/help#faq">Pair‑à‑pair WebRTC</a><a href="?demo">Mode démo</a></div>
+</div><div class="bot"><span>© LanShare — fonctionne en local</span><span>Adresse de ce PC : <span class="num">__IP__:__PORT__</span></span></div></div></footer>
+
+<script src="/web/shared.js"></script><script src="/web/qr.js"></script>
+<script>
+const LAN_IP="__IP__", DEMO=location.search.includes('demo');
+const $=id=>document.getElementById(id);
+let stream,es,pcs={};
+function go(){scrollTo({top:0});if(!$('setup').hidden)$('go').focus({preventScroll:true}),$('go').click();}
+function showErr(t){$('errt').textContent=t;$('err').classList.toggle('show',!!t);}
+$('cpin').onclick=e=>copyText($('pinv').textContent,e.currentTarget);
+$('cpin2').onclick=e=>copyText("__PIN__",e.currentTarget);
+$('curl').onclick=e=>copyText($('urlv').textContent,e.currentTarget);
+$('direct').onclick=e=>copyText(e.currentTarget.dataset.link,e.currentTarget);
+/* QR code (SVG net, fond blanc pour la lisibilité) */
+function drawQR(text){const q=qrcode(0,'M');q.addData(text);q.make();const n=q.getModuleCount(),m=2;let d='';
+  for(let r=0;r<n;r++)for(let c=0;c<n;c++)if(q.isDark(r,c))d+=`M${c+m} ${r+m}h1v1h-1z`;
+  $('qr').innerHTML=`<svg viewBox="0 0 ${n+2*m} ${n+2*m}" shape-rendering="crispEdges"><path d="${d}" fill="#101418"/></svg>`;}
+function demoStream(){const c=document.createElement('canvas');c.width=1280;c.height=720;const g=c.getContext('2d');let t=0;
+  setInterval(()=>{t++;g.fillStyle='#123';g.fillRect(0,0,1280,720);g.fillStyle='#22c55e';g.fillRect((t*8)%1200,300,80,80);
+  g.fillStyle='#fff';g.font='48px sans-serif';g.fillText('LanShare demo '+new Date().toLocaleTimeString(),40,80);},33);
+  return c.captureStream(30);}
+$('go').onclick=async()=>{
+  showErr('');const b=$('go');b.disabled=true;b.innerHTML=ic('loader-circle','spin')+'Choisis ton écran…';
+  const mode=document.querySelector('input[name=mode]:checked').value;
+  try{stream=DEMO?demoStream():await navigator.mediaDevices.getDisplayMedia({video:{frameRate:{ideal:30},cursor:'always'},audio:$('audio').checked});}
+  catch(e){b.disabled=false;b.innerHTML=ic('monitor-up')+'Partager mon écran';
+    showErr(e.name==='NotAllowedError'?'Partage annulé. Clique à nouveau et choisis un écran ou une fenêtre.':'Impossible de capturer l\'écran : '+e.message);return;}
+  const v=stream.getVideoTracks()[0];v.contentHint=mode;v.onended=stop;window.__mode=mode;
+  $('prev').srcObject=stream;$('setup').hidden=true;$('live').hidden=false;try{drawQR("__DIRECT__");}catch(_){$('qr').hidden=true;}
+  $('live-msg').textContent='Partage démarré';
+  es=new EventSource('/events?role=sender');
+  es.onmessage=async e=>{const m=JSON.parse(e.data);
+    if(m.type==='viewer-joined')addViewer(m.id);
+    else if(m.type==='viewer-left')drop(m.id);
+    else if(m.type==='answer'&&pcs[m.from])try{await pcs[m.from].setRemoteDescription({type:'answer',sdp:m.sdp});}catch(_){}
+    else if(m.type==='replaced')stop();};
+};
+function count(){const k=Object.values(pcs).filter(p=>p.connectionState==='connected').length;
+  $('n').textContent=k;$('s').textContent=k>1?'s':'';$('empty').hidden=Object.keys(pcs).length>0;window.__viewers=k;}
+function drop(id){if(pcs[id]){pcs[id].close();delete pcs[id];count();}}
+async function addViewer(id){
+  drop(id);
+  const pc=new RTCPeerConnection({iceServers:[]});pcs[id]=pc;
+  stream.getTracks().forEach(t=>pc.addTrack(t,stream));count();
+  pc.onconnectionstatechange=async()=>{count();
+    if(pc.connectionState==='connected'){
+      $('live-msg').textContent='Un spectateur est connecté';
+      for(const s of pc.getSenders()){if(s.track&&s.track.kind==='video')try{const p=s.getParameters();
+        if(!p.encodings||!p.encodings.length)p.encodings=[{}];p.encodings[0].maxBitrate=15e6;
+        p.degradationPreference=window.__mode==='detail'?'maintain-resolution':'balanced';await s.setParameters(p);}catch(_){}}}};
+  await pc.setLocalDescription(await pc.createOffer());await gathered(pc);
+  post({role:'sender',to:id,type:'offer',sdp:fixSdp(pc.localDescription.sdp,LAN_IP)});
+}
+function stop(){fetch('/bye',{method:'POST'});if(es)es.close();Object.keys(pcs).forEach(drop);
+  if(stream)stream.getTracks().forEach(t=>t.stop());$('live').hidden=true;$('setup').hidden=false;
+  const b=$('go');b.disabled=false;b.innerHTML=ic('monitor-up')+'Partager mon écran';$('live-msg').textContent='Partage arrêté';b.focus();}
+$('stop').onclick=stop;addEventListener('pagehide',()=>navigator.sendBeacon('/bye'));
+</script></body></html>

@@ -15,3 +15,8 @@ Aucune installation hormis Python 3.8+.
 
 ## Version MJPEG simple — `lanshare.py`
 `pip install mss pillow` puis `python lanshare.py share` (sans son, plus lourde en réseau).
+
+## Interface
+Police **DM Sans** (DM Mono pour les commandes) et icônes **Lucide** (ISC), embarquées dans `web/` : l'interface fonctionne 100 % hors ligne.
+Pages : `web/share.html`, `web/view.html`, `web/login.html`, `web/help.html` ; styles dans `web/app.css`.
+Pour régénérer les icônes : `python tools/make_icons.py <dossier lucide-static/icons>`.

@@ -1,0 +1,19 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>LanShare — Code PIN</title><link rel="preload" href="/web/dm-sans.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="/web/app.css">
+<style>
+body{display:grid;place-items:center;min-height:100vh;min-height:100dvh;padding:20px}
+.box{width:min(100%,400px);text-align:center}.box .ico{width:60px;height:60px;border-radius:18px;margin:0 auto 20px}
+h1{font-size:26px;margin-bottom:8px}.box>p{color:var(--mut);margin-bottom:24px}
+form{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:22px;box-shadow:var(--shadow);text-align:left}
+label{font-weight:600;font-size:14px;display:block;margin-bottom:8px}
+input{width:100%;font:700 30px var(--font);letter-spacing:.35em;text-align:center;border:1.5px solid var(--line);border-radius:12px;background:var(--bg);color:var(--fg);padding:12px 8px;min-height:64px;font-variant-numeric:tabular-nums}
+input:focus{border-color:var(--acc);outline:3px solid color-mix(in srgb,var(--ring) 40%,transparent);outline-offset:0}
+input[aria-invalid=true]{border-color:var(--bad)}.err{display:flex;gap:8px;align-items:center;color:var(--bad);font-size:14px;margin-top:10px}
+form .btn{width:100%;margin-top:16px}.help{margin-top:18px;font-size:14px}.help a{color:var(--mut);text-decoration:none;display:inline-flex;gap:6px;align-items:center;min-height:44px}
+</style></head><body><main class="box">
+<div class="ico">{{i:lock:lg}}</div><h1>Entre le code PIN</h1><p>Le code est affiché sur le PC qui partage son écran.</p>
+<form action="/" method="get"><label for="pin">Code PIN</label>
+ <input id="pin" name="pin" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" autofocus __INVALID__ aria-describedby="e">
+ <div id="e" class="err" role="alert" __ERRHIDE__>{{i:circle-x}}<span>__ERR__</span></div>
+ <button class="btn p lg" type="submit">{{i:arrow-right}}Voir l'écran</button></form>
+<p class="help"><a href="/help">{{i:life-buoy}} Besoin d'aide ?</a></p></main></body></html>
