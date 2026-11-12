@@ -11,6 +11,7 @@ Aucune installation hormis Python 3.8+.
 - Le son système n'est capturé que par Chrome/Edge sous Windows.
 - `?demo` sur `/share` (http://localhost:8080/share?demo) teste sans partager l'écran.
 - Aide intégrée : `/help` (diagnostic automatique, dépannage, pare-feu, FAQ).
+- Netteté : mode « Netteté maximale » (VP9, résolution native jusqu’à 4K, 30 Mb/s) ou « Vidéo et jeux » ; la qualité réellement envoyée est affichée en direct.
 - Options : `--port`, `--pin 1234`, `--no-pin`, `--no-browser`.
 
 ## Version MJPEG simple — `lanshare.py`

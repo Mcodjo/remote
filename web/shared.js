@@ -16,3 +16,12 @@ function copyText(text,btn){
   const fb=()=>{const t=document.createElement('textarea');t.value=text;document.body.appendChild(t);t.select();try{document.execCommand('copy');}catch(_){}t.remove();done();};
   (navigator.clipboard&&window.isSecureContext?navigator.clipboard.writeText(text).then(done,fb):fb());
 }
+
+/* Aide la montée en débit de l'émetteur (par défaut Chrome démarre à ~300 kb/s et met des secondes à gagner en netteté) */
+function boostSdp(sdp,startK=12000,minK=4000,maxK=30000){
+  return sdp.replace(/a=rtpmap:(\d+) (VP8|VP9|H264|AV1)\/90000\r?\n/g,(m,pt)=>{
+    const add=`x-google-start-bitrate=${startK};x-google-min-bitrate=${minK};x-google-max-bitrate=${maxK}`;
+    const re=new RegExp('a=fmtp:'+pt+' ');
+    return re.test(sdp)?m:m+`a=fmtp:${pt} ${add}\r\n`;})
+   .replace(/(a=fmtp:\d+ (?!.*x-google)[^\r\n]*)/g,(m)=>/apt=/.test(m)?m:m+`;x-google-start-bitrate=${startK};x-google-min-bitrate=${minK};x-google-max-bitrate=${maxK}`);
+}

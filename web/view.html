@@ -41,9 +41,11 @@ async function onOffer(m){
     else if(['failed','disconnected'].includes(pc.connectionState)){playing=false;say('Connexion perdue','Nouvelle tentative en cours…','wifi-off',false,true);}};
   await pc.setRemoteDescription({type:'offer',sdp:m.sdp});
   await pc.setLocalDescription(await pc.createAnswer());await gathered(pc);
-  post({role:'viewer',id:ID,type:'answer',sdp:fixSdp(pc.localDescription.sdp,myIp)});
-  timer=setInterval(async()=>{if(!pc)return;for(const r of (await pc.getStats()).values())
-    if(r.type==='inbound-rtp'&&r.kind==='video'){window.__stats=r;$('info').textContent=(r.frameWidth||'?')+'×'+(r.frameHeight||'?')+' · '+Math.round(r.framesPerSecond||0)+' i/s';}},1000);
+  post({role:'viewer',id:ID,type:'answer',sdp:boostSdp(fixSdp(pc.localDescription.sdp,myIp))});
+  let lb=0,lt=0;timer=setInterval(async()=>{if(!pc)return;const st=await pc.getStats();for(const r of st.values())
+    if(r.type==='inbound-rtp'&&r.kind==='video'){const now=performance.now(),mb=lt?((r.bytesReceived-lb)*8/1e6)/((now-lt)/1000):0;lb=r.bytesReceived;lt=now;
+      const c=r.codecId&&st.get(r.codecId)?st.get(r.codecId).mimeType.replace('video/',''):'';window.__stats=Object.assign({},r,{mb,codec:c});
+      $('info').textContent=(r.frameWidth||'?')+'×'+(r.frameHeight||'?')+' · '+Math.round(r.framesPerSecond||0)+' i/s · '+mb.toFixed(1)+' Mb/s · '+c;}},1000);
 }
 const es=new EventSource('/events?role=viewer&id='+ID);
 es.onmessage=e=>{const m=JSON.parse(e.data);

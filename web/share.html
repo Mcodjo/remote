@@ -32,6 +32,7 @@ fieldset{border:0;padding:0;margin:0}legend{font-weight:600;font-size:14px;color
 .val output.pinv{letter-spacing:.28em}
 .qr{background:#fff;border-radius:14px;padding:14px;width:min(100%,230px);margin:0 auto;border:1px solid var(--line)}.qr svg{display:block;width:100%;height:auto}
 .side{text-align:center}.side video{width:100%;border-radius:12px;background:#000;margin-top:16px;max-height:170px;object-fit:contain}.side .cap{font-size:13.5px;color:var(--mut);margin-top:10px}
+.q{margin-top:16px;background:var(--sunken);border:1px solid var(--line);border-radius:12px;padding:10px 14px;display:grid;gap:2px}.q .k{font-size:13px;font-weight:600;color:var(--mut)}.q b{font-size:15px}.q small{color:var(--mut);font-size:13.5px}
 .empty{display:flex;gap:10px;align-items:flex-start;background:var(--sunken);border-radius:12px;padding:12px 14px;margin-top:16px;font-size:14.5px;color:var(--mut)}
 .feat{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .card.big{grid-column:1/-1;display:grid;grid-template-columns:1fr 1.1fr;gap:28px;align-items:center}
@@ -62,8 +63,8 @@ fieldset{border:0;padding:0;margin:0}legend{font-weight:600;font-size:14px;color
 
  <div id="setup" class="setup">
   <fieldset><legend>Type de contenu</legend><div class="modes">
-   <div class="mode"><input type="radio" name="mode" id="m1" value="detail"><label for="m1"><span class="ico">{{i:type}}</span><span><b>Texte et documents</b><small>Image nette, idéale pour lire et présenter</small></span></label></div>
-   <div class="mode"><input type="radio" name="mode" id="m2" value="motion" checked><label for="m2"><span class="ico">{{i:video}}</span><span><b>Vidéo et jeux</b><small>Mouvement fluide, idéal pour les films</small></span></label></div>
+   <div class="mode"><input type="radio" name="mode" id="m1" value="detail"><label for="m1"><span class="ico">{{i:type}}</span><span><b>Netteté maximale</b><small>Texte, documents, code : image la plus nette (codec VP9)</small></span></label></div>
+   <div class="mode"><input type="radio" name="mode" id="m2" value="motion" checked><label for="m2"><span class="ico">{{i:video}}</span><span><b>Vidéo et jeux</b><small>Mouvement fluide, faible charge pour le PC</small></span></label></div>
   </div></fieldset>
   <label class="sw" for="audio"><span class="ico">{{i:volume-2}}</span><span class="t"><b>Partager le son</b><small>Son du PC (Chrome / Edge sous Windows)</small></span>
    <input type="checkbox" id="audio" role="switch" checked><span class="tog" aria-hidden="true"></span></label>
@@ -78,6 +79,7 @@ fieldset{border:0;padding:0;margin:0}legend{font-weight:600;font-size:14px;color
     <div class="val"><output id="urlv">__URL__</output><button class="btn s sm" id="curl" type="button" aria-label="Copier l'adresse">{{i:copy}}<span>Copier</span></button></div></div>
    <div class="field"><div class="k">{{i:key-round}}Code PIN</div>
     <div class="val"><output class="pinv">__PIN__</output><button class="btn s sm" id="cpin2" type="button" aria-label="Copier le code PIN">{{i:copy}}<span>Copier</span></button></div></div>
+   <div class="q" id="q" hidden><span class="k">Qualité envoyée</span><b id="qv" class="num"></b><small id="qh"></small></div>
    <div class="empty" id="empty">{{i:hourglass}}<span>En attente de spectateurs. Ouvre l'adresse sur l'autre appareil, ou scanne le QR code.</span></div>
    <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
     <button class="btn s" id="direct" type="button" data-link="__DIRECT__">{{i:link}}<span>Copier le lien direct</span></button>
@@ -145,6 +147,10 @@ fieldset{border:0;padding:0;margin:0}legend{font-weight:600;font-size:14px;color
 <script src="/web/shared.js"></script><script src="/web/qr.js"></script>
 <script>
 const LAN_IP="__IP__", DEMO=location.search.includes('demo');
+/* Profils : « detail » = netteté maximale (VP9, 30 Mb/s, on baisse les images/s plutôt que la résolution) */
+const PROFILES={
+  detail:{hint:'text',codecs:['video/VP9','video/H264','video/VP8'],maxBitrate:30e6,degr:'maintain-resolution'},
+  motion:{hint:'motion',codecs:['video/H264','video/VP8','video/VP9'],maxBitrate:20e6,degr:'balanced'}};
 const $=id=>document.getElementById(id);
 let stream,es,pcs={};
 function go(){scrollTo({top:0});if(!$('setup').hidden)$('go').focus({preventScroll:true}),$('go').click();}
@@ -164,10 +170,10 @@ function demoStream(){const c=document.createElement('canvas');c.width=1280;c.he
 $('go').onclick=async()=>{
   showErr('');const b=$('go');b.disabled=true;b.innerHTML=ic('loader-circle','spin')+'Choisis ton écran…';
   const mode=document.querySelector('input[name=mode]:checked').value;
-  try{stream=DEMO?demoStream():await navigator.mediaDevices.getDisplayMedia({video:{frameRate:{ideal:30},cursor:'always'},audio:$('audio').checked});}
+  try{stream=DEMO?demoStream():await navigator.mediaDevices.getDisplayMedia({video:{frameRate:{ideal:30,max:60},width:{ideal:3840},height:{ideal:2160},cursor:'always'},audio:$('audio').checked});}
   catch(e){b.disabled=false;b.innerHTML=ic('monitor-up')+'Partager mon écran';
     showErr(e.name==='NotAllowedError'?'Partage annulé. Clique à nouveau et choisis un écran ou une fenêtre.':'Impossible de capturer l\'écran : '+e.message);return;}
-  const v=stream.getVideoTracks()[0];v.contentHint=mode;v.onended=stop;window.__mode=mode;
+  const v=stream.getVideoTracks()[0];v.contentHint=PROFILES[mode].hint;v.onended=stop;window.__mode=mode;
   $('prev').srcObject=stream;$('setup').hidden=true;$('live').hidden=false;try{drawQR("__DIRECT__");}catch(_){$('qr').hidden=true;}
   $('live-msg').textContent='Partage démarré';
   es=new EventSource('/events?role=sender');
@@ -177,6 +183,15 @@ $('go').onclick=async()=>{
     else if(m.type==='answer'&&pcs[m.from])try{await pcs[m.from].setRemoteDescription({type:'answer',sdp:m.sdp});}catch(_){}
     else if(m.type==='replaced')stop();};
 };
+let lastB=0,lastT=0;
+setInterval(async()=>{const pc=Object.values(pcs).find(p=>p.connectionState==='connected');$('q').hidden=!pc;if(!pc)return;
+  const st=await pc.getStats();let o=null,codec='';st.forEach(r=>{if(r.type==='outbound-rtp'&&r.kind==='video')o=r;});
+  if(!o)return;if(o.codecId&&st.get(o.codecId))codec=st.get(o.codecId).mimeType.replace('video/','');
+  const now=performance.now(),mb=lastT?((o.bytesSent-lastB)*8/1e6)/((now-lastT)/1000):0;lastB=o.bytesSent;lastT=now;
+  window.__q={w:o.frameWidth,h:o.frameHeight,fps:o.framesPerSecond,codec,mb,limit:o.qualityLimitationReason};
+  $('qv').textContent=`${o.frameWidth||'?'}×${o.frameHeight||'?'} · ${Math.round(o.framesPerSecond||0)} i/s · ${mb.toFixed(1)} Mb/s · ${codec}`;
+  const L={bandwidth:'Le réseau limite la qualité : rapproche le spectateur de la box ou passe-le en 5 GHz.',cpu:'Le PC est surchargé : choisis « Vidéo et jeux » ou ferme des applications.'};
+  $('qh').textContent=L[o.qualityLimitationReason]||'Aucune limite détectée.';},1000);
 function count(){const k=Object.values(pcs).filter(p=>p.connectionState==='connected').length;
   $('n').textContent=k;$('s').textContent=k>1?'s':'';$('empty').hidden=Object.keys(pcs).length>0;window.__viewers=k;}
 function drop(id){if(pcs[id]){pcs[id].close();delete pcs[id];count();}}
@@ -184,12 +199,16 @@ async function addViewer(id){
   drop(id);
   const pc=new RTCPeerConnection({iceServers:[]});pcs[id]=pc;
   stream.getTracks().forEach(t=>pc.addTrack(t,stream));count();
+  const P=PROFILES[window.__mode];
+  try{const tr=pc.getTransceivers().find(t=>t.sender.track&&t.sender.track.kind==='video');
+    const caps=RTCRtpSender.getCapabilities('video').codecs,rank=c=>{const i=P.codecs.indexOf(c.mimeType);return i<0?99:i;};
+    tr.setCodecPreferences([...caps].sort((a,b)=>rank(a)-rank(b)));}catch(_){}
   pc.onconnectionstatechange=async()=>{count();
     if(pc.connectionState==='connected'){
       $('live-msg').textContent='Un spectateur est connecté';
       for(const s of pc.getSenders()){if(s.track&&s.track.kind==='video')try{const p=s.getParameters();
-        if(!p.encodings||!p.encodings.length)p.encodings=[{}];p.encodings[0].maxBitrate=15e6;
-        p.degradationPreference=window.__mode==='detail'?'maintain-resolution':'balanced';await s.setParameters(p);}catch(_){}}}};
+        if(!p.encodings||!p.encodings.length)p.encodings=[{}];p.encodings[0].maxBitrate=P.maxBitrate;p.encodings[0].scaleResolutionDownBy=1;
+        p.encodings[0].priority='high';p.encodings[0].networkPriority='high';p.degradationPreference=P.degr;await s.setParameters(p);}catch(_){}}}};
   await pc.setLocalDescription(await pc.createOffer());await gathered(pc);
   post({role:'sender',to:id,type:'offer',sdp:fixSdp(pc.localDescription.sdp,LAN_IP)});
 }
