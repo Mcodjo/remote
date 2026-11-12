@@ -10,6 +10,7 @@ Aucune installation hormis Python 3.8+.
 - Vidéo + son en pair-à-pair, sans cloud ni STUN. Plusieurs spectateurs possibles.
 - Le son système n'est capturé que par Chrome/Edge sous Windows.
 - `?demo` sur `/share` (http://localhost:8080/share?demo) teste sans partager l'écran.
+- Aide intégrée : `/help` (diagnostic automatique, dépannage, pare-feu, FAQ).
 - Options : `--port`, `--pin 1234`, `--no-pin`, `--no-browser`.
 
 ## Version MJPEG simple — `lanshare.py`
