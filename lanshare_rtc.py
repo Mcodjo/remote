@@ -16,7 +16,8 @@ from http.cookies import SimpleCookie
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
 
-WEB = Path(__file__).resolve().parent / "web"
+BASE = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent))  # _MEIPASS : exe PyInstaller
+WEB = BASE / "web"
 STATIC = {".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".svg": "image/svg+xml",
           ".woff2": "font/woff2"}
 _ICON = re.compile(r"\{\{i:([\w-]+)(?::(\w+))?\}\}")

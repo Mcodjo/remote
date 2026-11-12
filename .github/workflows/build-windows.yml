@@ -1,0 +1,60 @@
+name: Build LanShare.exe (Windows)
+
+on:
+  workflow_dispatch:          # bouton « Run workflow » dans l'onglet Actions
+  push:
+    tags: ["v*"]              # un tag v1.0 crée aussi une Release avec l'exe
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Installer PyInstaller
+        run: python -m pip install --upgrade pip pyinstaller
+
+      - name: Construire LanShare.exe
+        run: >
+          pyinstaller --onefile --name LanShare
+          --add-data "web;web"
+          --hidden-import lanshare_input
+          lanshare_rtc.py
+
+      - name: Test de fumée (l'exe démarre et sert les pages)
+        shell: pwsh
+        run: |
+          $p = Start-Process -FilePath dist\LanShare.exe -ArgumentList "--no-browser","--no-pin","--port","8099" -PassThru
+          Start-Sleep -Seconds 6
+          try {
+            $s = Invoke-RestMethod http://localhost:8099/status
+            Write-Host "status:" ($s | ConvertTo-Json -Compress)
+            $c = Invoke-RestMethod http://localhost:8099/control/caps
+            Write-Host "controle:" ($c | ConvertTo-Json -Compress)
+            foreach ($u in "/share","/help","/web/app.css","/web/dm-sans.woff2","/web/icons.svg") {
+              $r = Invoke-WebRequest "http://localhost:8099$u" -UseBasicParsing
+              if ($r.StatusCode -ne 200) { throw "$u -> $($r.StatusCode)" }
+              Write-Host "OK $u ($($r.RawContentLength) octets)"
+            }
+          } finally {
+            Stop-Process -Id $p.Id -Force
+          }
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LanShare-windows
+          path: dist/LanShare.exe
+
+      - name: Publier une Release (tags uniquement)
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release create "${{ github.ref_name }}" dist/LanShare.exe --title "LanShare ${{ github.ref_name }}" --notes "Double-clic sur LanShare.exe, aucun Python requis."

@@ -22,3 +22,7 @@ Aucune installation hormis Python 3.8+.
 Police **DM Sans** (DM Mono pour les commandes) et icônes **Lucide** (ISC), embarquées dans `web/` : l'interface fonctionne 100 % hors ligne.
 Pages : `web/share.html`, `web/view.html`, `web/login.html`, `web/help.html` ; styles dans `web/app.css`.
 Pour régénérer les icônes : `python tools/make_icons.py <dossier lucide-static/icons>`.
+
+## LanShare.exe (Windows, sans Python)
+Onglet **Actions** du dépôt GitHub → « Build LanShare.exe (Windows) » → *Run workflow* → télécharger l'artefact `LanShare-windows`.
+Un tag `v1.0` publie aussi l'exe dans les Releases. L'exe n'est pas signé : SmartScreen peut demander « Informations complémentaires » puis « Exécuter quand même ».
