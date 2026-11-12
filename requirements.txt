@@ -1,0 +1,3 @@
+mss
+pillow
+qrcode  # optionnel : QR code dans le terminal
